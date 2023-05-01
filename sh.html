@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Seller's Admin Page</title>
+  </head>
+  <body>
+    <h1>Seller's Admin Page</h1>
+    <div>
+      <label>Product Name:</label>
+      <input type="text" id="productName">
+      <label>Quantity:</label>
+      <input type="number" id="productQuantity">
+      <label>Price:</label>
+      <input type="number" id="productPrice">
+      <button id="addProductButton">Add Product</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Total Value</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3">Total Value:</td>
+          <td id="totalStockValue">0</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </body>
+  <script src="app.js"></script>
+</html>
