@@ -1,40 +1,152 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Seller's Admin Page</title>
-  </head>
-  <body>
-    <h1>Seller's Admin Page</h1>
-    <div>
-      <label>Product Name:</label>
-      <input type="text" id="productName">
-      <label>Quantity:</label>
-      <input type="number" id="productQuantity">
-      <label>Price:</label>
-      <input type="number" id="productPrice">
-      <button id="addProductButton">Add Product</button>
-    </div>
-    <table>
-      <thead>
+<head>
+    <title>Expense Tracker App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e57070;
+            font-weight: bold;
+        }
+
+        td button {
+            margin-right: 5px;
+        }
+
+        .edit-mode {
+            background-color: #5ea0be;
+        }
+    </style>
+</head>
+<body>
+    <h1>Expense Tracker App</h1>
+
+    <h2>Add Expense</h2>
+    <form id="expenseForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" required>
+        <label for="date">Date:</label>
+        <input type="date" id="date" required>
+        <button type="submit">Add Expense</button>
+    </form>
+
+    <h2>Expense List</h2>
+    <table id="expenseTable">
         <tr>
-          <th>Product Name</th>
-          <th>Quantity</th>
-          <th>Price</th>
-          <th>Total Value</th>
-          <th>Actions</th>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
         </tr>
-      </thead>
-      <tbody id="productTableBody">
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3">Total Value:</td>
-          <td id="totalStockValue">0</td>
-          <td></td>
-        </tr>
-      </tfoot>
     </table>
-  </body>
-  <script src="app.js"></script>
+
+    <script>
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+        function saveExpenses() {
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+        }
+
+        function addExpense(name, amount, date) {
+            const expense = {
+                id: Date.now(),
+                name: name,
+                amount: amount,
+                date: date
+            };
+
+            expenses.push(expense);
+            saveExpenses();
+            displayExpenses();
+        }
+
+        function deleteExpense(id) {
+            expenses = expenses.filter(expense => expense.id !== id);
+            saveExpenses();
+            displayExpenses();
+        }
+
+        function displayExpenses() {
+            const table = document.getElementById('expenseTable');
+            table.innerHTML = `
+                <tr>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            `;
+
+            expenses.forEach(expense => {
+                const row = table.insertRow();
+                row.innerHTML = `
+                    <td>${expense.name}</td>
+                    <td>${expense.amount}</td>
+                    <td>${expense.date}</td>
+                    <td>
+                        <button class="edit-btn" onclick="editExpense(${expense.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteExpense(${expense.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function editExpense(id) {
+            const expense = expenses.find(expense => expense.id === id);
+            if (expense) {
+                const nameInput = document.getElementById('name');
+                const amountInput = document.getElementById('amount');
+                const dateInput = document.getElementById('date');
+
+                nameInput.value = expense.name;
+                amountInput.value = expense.amount;
+                dateInput.value = expense.date;
+
+                // Add edit mode styling to the row
+                const row = document.querySelector(`#expenseTable tr[data-id="${id}"]`);
+                row.classList.add('edit-mode');
+
+                deleteExpense(id);
+            }
+        }
+
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const amount = document.getElementById('amount').value;
+            const date = document.getElementById('date').value;
+
+            addExpense(name, amount, date);
+
+            document.getElementById('name').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('date').value = '';
+        });
+
+        displayExpenses();
+    </script>
+</body>
 </html>
