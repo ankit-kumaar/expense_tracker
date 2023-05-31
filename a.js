@@ -1,105 +1,83 @@
-let lastActivityTime = null;
-const posts = [];
+let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
 
-function updateLastUserActivityTime() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      lastActivityTime = new Date();
-      resolve();
-    }, 1000);
-  });
+function saveExpenses() {
+    localStorage.setItem('expenses', JSON.stringify(expenses));
 }
 
-function createPost(post) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      posts.push(post);
-      resolve();
-    }, 2000);
-  });
+function addExpense(name, amount, date) {
+    const expense = {
+        id: Date.now(),
+        name: name,
+        amount: amount,
+        date: date
+    };
+
+    expenses.push(expense);
+    saveExpenses();
+    displayExpenses();
 }
 
-function deleteLastPost() {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (posts.length > 0) {
-        const deletedPost = posts.pop();
-        resolve(deletedPost);
-      } else {
-        reject("ERROR: ARRAY IS EMPTY");
-      }
-    }, 1000);
-  });
+function deleteExpense(id) {
+    expenses = expenses.filter(expense => expense.id !== id);
+    saveExpenses();
+    displayExpenses();
 }
 
-// Call createPost and updateLastUserActivityTime promises together
-createPost({ title: "Post 1" })
-  .then(() => updateLastUserActivityTime())
-  .then(() => {
-    console.log("All promises resolved");
-    console.log("Posts:", posts);
-    console.log("Last Activity Time:", lastActivityTime);
-
-    return deleteLastPost();
-  })
-  .then((const productTableBody = document.querySelector('#productTableBody');
-  const productNameInput = document.querySelector('#productName');
-  const productQuantityInput = document.querySelector('#productQuantity');
-  const productPriceInput = document.querySelector('#productPrice');
-  const addProductButton = document.querySelector('#addProductButton');
-  const totalStockValueCell = document.querySelector('#totalStockValue');
-  
-  let products = [];
-  
-  // Adds a new product to the table and updates the total stock value.
-  function addProduct() {
-    const name = productNameInput.value.trim();
-    const quantity = parseInt(productQuantityInput.value);
-    const price = parseFloat(productPriceInput.value);
-    if (!name || !quantity || !price) {
-      alert('Please fill in all the fields.');
-      return;
-    }
-    const totalValue = quantity * price;
-    const product = { name, quantity, price, totalValue };
-    products.push(product);
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${product.name}</td>
-      <td>${product.quantity}</td>
-      <td>$${product.price.toFixed(2)}</td>
-      <td>$${product.totalValue.toFixed(2)}</td>
-      <td><button class="deleteButton">Delete</button></td>
+function displayExpenses() {
+    const table = document.getElementById('expenseTable');
+    table.innerHTML = `
+        <tr>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Actions</th>
+        </tr>
     `;
-    const deleteButton = row.querySelector('.deleteButton');
-    deleteButton.addEventListener('click', () => deleteProduct(product));
-    productTableBody.appendChild(row);
-    productNameInput.value = '';
-    productQuantityInput.value = '';
-    productPriceInput.value = '';
-    updateTotalStockValue();
-  }
-  
-  // Deletes a product from the table and updates the total stock value.
-  function deleteProduct(product) {
-    products = products.filter(p => p !== product);
-    const row = productTableBody.querySelector(`tr:has(td:contains(${product.name}))`);
-    productTableBody.removeChild(row);
-    updateTotalStockValue();
-  }
-  
-  // Updates the total stock value.
-  function updateTotalStockValue() {
-    const totalValue = products.reduce((acc, p) => acc + p.totalValue, 0);
-    totalStockValueCell.innerText = `$${totalValue.toFixed(2)}`;
-  }
-  
-  // Bind the addProduct function to the Add Product button.
-  addProductButton.addEventListener('click', addProduct
-  deletedPost) => {
-    console.log("Deleted Post:", deletedPost);
-    console.log("Updated Posts:", posts);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+
+    expenses.forEach(expense => {
+        const row = table.insertRow();
+        row.innerHTML = `
+            <td>${expense.name}</td>
+            <td>${expense.amount}</td>
+            <td>${expense.date}</td>
+            <td>
+                <button class="edit-btn" onclick="editExpense(${expense.id})">Edit</button>
+                <button class="delete-btn" onclick="deleteExpense(${expense.id})">Delete</button>
+            </td>
+        `;
+    });
+}
+
+function editExpense(id) {
+    const expense = expenses.find(expense => expense.id === id);
+    if (expense) {
+        const nameInput = document.getElementById('name');
+        const amountInput = document.getElementById('amount');
+        const dateInput = document.getElementById('date');
+
+        nameInput.value = expense.name;
+        amountInput.value = expense.amount;
+        dateInput.value = expense.date;
+
+        // Add edit mode styling to the row
+        const row = document.querySelector(`#expenseTable tr[data-id="${id}"]`);
+        row.classList.add('edit-mode');
+
+        deleteExpense(id);
+    }
+}
+
+document.getElementById('expenseForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const amount = document.getElementById('amount').value;
+    const date = document.getElementById('date').value;
+
+    addExpense(name, amount, date);
+
+    document.getElementById('name').value = '';
+    document.getElementById('amount').value = '';
+    document.getElementById('date').value = '';
+});
+
+displayExpenses();
